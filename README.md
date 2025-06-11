@@ -39,3 +39,6 @@ Projeto com o objetivo de gerar um ebook digital com as facilidades das ferramen
 
 - Ebook gerado durante as aulas em `output`
 - Prompts utilizados em `prompts`
+
+## Extra!
+- Utilizado HTML e CSS para gerar uma página web de exibição do Ebook.
