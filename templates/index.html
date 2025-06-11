@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../style/style.css">
+
+    <style type="text/css" media="print">
+        .noprint {
+            display: none
+        }
+        
+        .print {
+            display: block !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <header class="el-header noprint">
+            <div class="icon-btns">
+                <i class="icon-list" @click="changeLeftMenu"></i>
+                <i class="icon-skip_previous" v-bind:class="{'disabled': currentPage == 1}" @click="changeCurrentPage('first')"></i>
+                <i class="icon-play_arrow prev-icon" v-bind:class="{'disabled': currentPage == 1}" @click="changeCurrentPage('prev')"></i>
+                <i class="icon-play_arrow" v-bind:class="{'disabled': currentPage == pageNum}" @click="changeCurrentPage('next')"></i>
+                <i class="icon-skip_next" v-bind:class="{'disabled': currentPage == pageNum}" @click="changeCurrentPage('last')"></i>
+                <select v-model="currentPage">
+                    <option v-for="page in pageNum" v-bind:value="page">page {{ page }}</option>
+                </select>
+                <i class="icon-zoom_in" v-bind:class="{'disabled': zoomNum == 2}" @click="modifyZoom('in')"></i>
+                <select v-model="zoomNum">
+                    <option value="0.5">50%</option>
+                    <option value="0.6">60%</option>
+                    <option value="0.7">70%</option>
+                    <option value="0.8">80%</option>
+                    <option value="0.9">90%</option>
+                    <option value="1.0" selected>100%</option>
+                    <option value="1.1">110%</option>
+                    <option value="1.2">120%</option>
+                    <option value="1.3">130%</option>
+                    <option value="1.4">140%</option>
+                    <option value="1.5">150%</option>
+                    <option value="1.6">160%</option>
+                    <option value="1.7">170%</option>
+                    <option value="1.8">180%</option>
+                    <option value="1.9">190%</option>
+                    <option value="2.0">200%</option>
+                </select>
+                <i class="icon-zoom_out" v-bind:class="{'disabled': zoomNum == 0.5}" @click="modifyZoom('out')"></i>
+                <i class="icon-format_align_left" @click="textAlign = 'left'"></i>
+                <i class="icon-format_align_center" @click="textAlign = 'center'"></i>
+                <i class="icon-format_align_right" @click="textAlign = 'right'"></i>
+                <i class="icon-print" @click="window.print()"></i>
+            </div>
+        </header>
+
+        <aside class="noprint" width="240px" v-show="ifMenuShow">
+            <nav class="tabNav">
+                <ul>
+                    <li v-bind:class="{ 'curr': currentNav == 0 }" @click="currentNav = 0">Page</li>
+                    <li v-bind:class="{ 'curr': currentNav == 1 }" @click="currentNav = 1">Bookmark</li>
+                </ul>
+
+                <div class="clear"></div>
+            </nav>
+
+            <div class="tab-conent scrollbar" v-bind:style="{ height: asideHeight + 'px' }">
+
+            <section v-show="currentNav == 0">
+                <ul class="page-menu">
+                    <li v-for="page in pageNum" v-bind:class="{ 'curr': currentPage == page }" @click="changePage(page)"><i class="icon-file-text2"></i> page {{ page }}</li>
+                </ul>
+            </section>
+
+            <section v-show="currentNav == 1">
+                <ul class="page-menu">
+                    <li v-for="page in pageNum" v-bind:class="{ 'curr': currentPage == page }" @click="changePage(page)"><i class="icon-turned_in_not"></i> Bookmark {{ page }}</li>
+                </ul>
+            </section>
+        </div>
+
+        </aside>
+        <div class="main scrollbar noprint"  v-bind:style="{ height: mainHeight + 'px' }" v-bind:class="{ 'mainLeftM': ifMenuShow, 'aleft': textAlign === 'left','acenter': textAlign === 'center','aright': textAlign === 'right'}">
+            <div class="conent" v-html="pageContent" v-bind:style="zoomStyle"></div>
+
+            <div class="clear"></div>
+        </div>
+
+        <!--专门只为打印的内容-->
+        <div class="conent print" style="display:none" v-html="pageContent"></div>
+    </div>
+</body>
+<!-- 先引入 Vue -->
+<script src="js/vue.min.js"></script>
+<script>
+
+var app = new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                // visible: false,
+                isCollapse: false,
+                currentNav: 0,
+                activeName2: 'first',
+                pageNum: 1, 
+                currentPage: 1,
+                pageContent: '',
+                asideHeight: 300,
+                mainHeight: 300,
+                ifMenuShow: true,
+                zoomNum: '1.0',
+                textAlign: 'left',
+                zoomStyle: {},
+                pageDatas: ['<div><div style="position:absolute;top:0.000000px;left:0.000000px"><nobr><img height="1344.000000" width="1008.000000" src ="bgimg/bg00001.jpg"/><br/></nobr></div></div>','<div><div style="position:absolute;top:0.000000px;left:0.000000px"><nobr><img height="1344.000000" width="1008.000000" src ="bgimg/bg00002.jpg"/><br/></nobr></div></div>','<div><div style="position:absolute;top:0.000000px;left:0.000000px"><nobr><img height="1344.000000" width="1008.000000" src ="bgimg/bg00003.jpg"/><br/></nobr></div><p><span style="position:absolute;top:130.983154px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Understand the board. </span></nobr></span></p><p><span style="position:absolute;top:207.178635px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Financial Diagnosis and Mindset </span></nobr></span></p><p><span style="position:absolute;top:282.693512px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Before you can make any move in the financial game, you need to understand </span></nobr></span><span style="position:absolute;top:311.498047px;left:111.891808px"><nobr>exactly where you stand on the board. This means mapping out your finances </span></nobr></span><span style="position:absolute;top:340.390625px;left:111.891808px"><nobr>with complete clarity: how much you earn, how much you spend, and the real </span></nobr></span><span style="position:absolute;top:369.219330px;left:111.891808px"><nobr>size of your debts. Most people don’t know exactly how much they owe or </span></nobr></span><span style="position:absolute;top:398.047852px;left:111.891808px"><nobr>where their money goes each month — and that’s like playing chess without </span></nobr></span><span style="position:absolute;top:426.876465px;left:111.891808px"><nobr>seeing the pieces. The first step is to have an honest and detailed financial </span></nobr></span><span style="position:absolute;top:455.704956px;left:111.891808px"><nobr>diagnosis.</span></nobr></span></p><p><span style="position:absolute;top:513.362122px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">With the numbers in hand, the next move is to work on your mind. The way you </span></nobr></span><span style="position:absolute;top:542.190674px;left:111.891808px"><nobr>see money directly influences your decisions. Beliefs like “money is hard to </span></nobr></span><span style="position:absolute;top:571.019287px;left:111.891808px"><nobr>earn” or “investing is only for the rich” create invisible bariers that keep you </span></nobr></span><span style="position:absolute;top:599.823792px;left:111.891808px"><nobr>stuck in the same place. Changing this mindset is esential to making smart </span></nobr></span><span style="position:absolute;top:628.703125px;left:111.891808px"><nobr>moves. Financial education is not just about numbers; it is, above all, about</span></nobr></span><span style="position:absolute;top:657.531738px;left:111.891808px"><nobr>behavior.</span></nobr></span></p><p><span style="position:absolute;top:715.188782px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">To have control of your financial game, it is essential to set goals. Short term: get</span></nobr></span><span style="position:absolute;top:744.017395px;left:111.891808px"><nobr>out of the red. Medium term: build up a reserve. Long term: achieve financial </span></nobr></span><span style="position:absolute;top:772.845947px;left:111.891808px"><nobr>freedom. With these clear goals, you can begin to see each choice as a strategic</span></nobr></span><span style="position:absolute;top:801.674500px;left:111.891808px"><nobr>strategy. Spend intentionally, cut back on excesses, and allocate your resources </span></nobr></span><span style="position:absolute;top:830.503113px;left:111.891808px"><nobr>with focus. Every small decision is important — just like every move in chess — </span></nobr></span><span style="position:absolute;top:859.331726px;left:111.891808px"><nobr>and can change the course of the game. </span></nobr></span></p><p><span style="position:absolute;top:917.015381px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Finaly, adopt a tol to control your finances. It could be a simple spreadsheet, </span></nobr></span><span style="position:absolute;top:945.844055px;left:111.891808px"><nobr>an app, or even a notebook. The important thing is to have total control. If you </span></nobr></span><span style="position:absolute;top:974.672729px;left:111.891808px"><nobr>don’t measure, you won’t improve. Knowing your financial board is the </span></nobr></span><span style="position:absolute;top:1003.501221px;left:111.891808px"><nobr>foundation for building a solid plan. From here, you can start protecting your </span></nobr></span><span style="position:absolute;top:1032.329712px;left:111.891808px"><nobr>king (your financial well-being) and paving the way to move forward with </span></nobr></span><span style="position:absolute;top:1061.158447px;left:111.891808px"><nobr>confidence.</span></nobr></span></p></div>','<div><div style="position:absolute;top:0.000000px;left:0.000000px"><nobr><img height="1344.000000" width="1008.000000" src ="bgimg/bg00004.jpg"/><br/></nobr></div></div>','<div><div style="position:absolute;top:0.000000px;left:0.000000px"><nobr><img height="1344.000000" width="1008.000000" src ="bgimg/bg00005.jpg"/><br/></nobr></div><p><span style="position:absolute;top:119.545166px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Protect the king </span></nobr></span></p><p><span style="position:absolute;top:216.334396px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">How to Get Out of Debt with Strategy </span></nobr></span></p><p><span style="position:absolute;top:298.591888px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">In chess, protecting the king is a priority — and in finance, the “king” is your </span></nobr></span><span style="position:absolute;top:327.471191px;left:111.891808px"><nobr>stability. Before you think about investing or growing financially, you need to </span></nobr></span><span style="position:absolute;top:356.299805px;left:111.891808px"><nobr>protect the essential: paying of your debts. Debts are like opposing pieces </span></nobr></span><span style="position:absolute;top:385.128326px;left:111.891808px"><nobr>advancing on the board, consuming your resources and limiting your </span></nobr></span><span style="position:absolute;top:413.956879px;left:111.891808px"><nobr>movements. The first step to regaining control is to organize all your outstanding </span></nobr></span><span style="position:absolute;top:442.785492px;left:111.891808px"><nobr>debts in order of value, interest, and impact on your budget. </span></nobr></span></p><p><span style="position:absolute;top:500.442719px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">There are two main methods for geting out of debt: the Snowball, where you </span></nobr></span><span style="position:absolute;top:529.271240px;left:111.891808px"><nobr>start with the smallest debts and gain motivation with each payment, and the </span></nobr></span><span style="position:absolute;top:558.099792px;left:111.891808px"><nobr>Avalanche, which atacks the debts with the highest interest first, being more </span></nobr></span><span style="position:absolute;top:586.904419px;left:111.891808px"><nobr>financialy eficient. The ideal is to choose the strategy that you wil be able to </span></nobr></span><span style="position:absolute;top:615.796997px;left:111.891808px"><nobr>maintain consistently. The important thing is to make constant moves — always</span></nobr></span><span style="position:absolute;top:644.625549px;left:111.891808px"><nobr>paying something, even if it is a small amount, and not stopping. </span></nobr></span></p><p><span style="position:absolute;top:702.282715px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Negotiating is a powerful move. Many people do not know that debts can be </span></nobr></span><span style="position:absolute;top:731.111328px;left:111.891808px"><nobr>renegotiated with significant discounts, especially when it comes to old debts. </span></nobr></span><span style="position:absolute;top:759.939880px;left:111.891808px"><nobr>Banks and creditors would rather receive something than nothing, so use this to </span></nobr></span><span style="position:absolute;top:788.768372px;left:111.891808px"><nobr>your advantage. But be careful: only make deals that actually fit within your </span></nobr></span><span style="position:absolute;top:817.596985px;left:111.891808px"><nobr>budget. A poorly planned new installment plan could be a check in disguise. </span></nobr></span></p><p><span style="position:absolute;top:875.280762px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Even while you pay of debts, start building up a small emergency fund — no</span></nobr></span><span style="position:absolute;top:904.109375px;left:111.891808px"><nobr>mater how small. This wil prevent unforeseen events from forcing you into </span></nobr></span><span style="position:absolute;top:932.937927px;left:111.891808px"><nobr>debt again, creating an endless cycle. Geting out of debt isn\'t just about paying </span></nobr></span><span style="position:absolute;top:961.766479px;left:111.891808px"><nobr>of bils, it\'s about changing your financial behavior patern. Protecting your king </span></nobr></span><span style="position:absolute;top:990.595154px;left:111.891808px"><nobr>means ensuring that you don\'t end up back where you started, but rather </span></nobr></span><span style="position:absolute;top:1019.423584px;left:111.891808px"><nobr>moving forward, with strategy and consistency, towards financial freedom. </span></nobr></span></p></div>','<div><div style="position:absolute;top:0.000000px;left:0.000000px"><nobr><img height="1344.000000" width="1008.000000" src ="bgimg/bg00006.jpg"/><br/></nobr></div></div>','<div><div style="position:absolute;top:0.000000px;left:0.000000px"><nobr><img height="1344.000000" width="1008.000000" src ="bgimg/bg00007.jpg"/><br/></nobr></div><p><span style="position:absolute;top:105.010826px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Master moves </span></nobr></span></p><p><span style="position:absolute;top:201.786545px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Investment Fundamentals </span></nobr></span></p><p><span style="position:absolute;top:284.068268px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">After protecting the king, it\'s time to move forward intelligently. Growing</span></nobr></span><span style="position:absolute;top:312.896820px;left:111.891808px"><nobr>financially requires more than just saving money — you need to invest. Investing</span></nobr></span><span style="position:absolute;top:341.725342px;left:111.891808px"><nobr>is making your money work for you, multiplying resources in the medium and </span></nobr></span><span style="position:absolute;top:370.553955px;left:111.891808px"><nobr>long term. To do this, you need to understand the diference between saving </span></nobr></span><span style="position:absolute;top:399.382477px;left:111.891808px"><nobr>and investing. Saving is accumulating money, usually in low-yield locations, such</span></nobr></span><span style="position:absolute;top:428.251068px;left:111.891808px"><nobr>as savings accounts. Investing is investing this money in assets that generate </span></nobr></span><span style="position:absolute;top:457.079651px;left:111.891808px"><nobr>returns — with controled risks. </span></nobr></span></p><p><span style="position:absolute;top:514.736816px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">The first concept you need to master is that of fixed income and variable </span></nobr></span><span style="position:absolute;top:543.565430px;left:111.891808px"><nobr>income. In fixed income, such as Treasury Direct or CDBs, you know in advance </span></nobr></span><span style="position:absolute;top:572.393982px;left:111.891808px"><nobr>how much you wil receive and in how long. They are ideal for beginners. In</span></nobr></span><span style="position:absolute;top:601.222473px;left:111.891808px"><nobr>variable income — such as stocks, real estate funds or cryptocurrencies — the</span></nobr></span><span style="position:absolute;top:630.051086px;left:111.891808px"><nobr>gains are greater, but so are the risks. A god player does not enter a game</span></nobr></span><span style="position:absolute;top:658.879700px;left:111.891808px"><nobr>without knowing the pieces: understand where they are puting their money. </span></nobr></span></p><p><span style="position:absolute;top:716.563477px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Another essential point is to identify your investor profile: conservative,</span></nobr></span><span style="position:absolute;top:745.392090px;left:111.891808px"><nobr>moderate or bold. This profile wil guide your choices and avoid impulsive </span></nobr></span><span style="position:absolute;top:774.220703px;left:111.891808px"><nobr>decisions, which are common traps. For beginners, it is safer to start with </span></nobr></span><span style="position:absolute;top:803.049255px;left:111.891808px"><nobr>predictable assets while you develop knowledge and confidence. Remember: in</span></nobr></span><span style="position:absolute;top:831.877747px;left:111.891808px"><nobr>chess and investing, patience usually beats haste. </span></nobr></span></p><p><span style="position:absolute;top:889.534912px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Finaly, understand the power of compound interest — the famous formula for </span></nobr></span><span style="position:absolute;top:918.363525px;left:111.891808px"><nobr>multiplication over time. The sooner you start, the less money you need to build </span></nobr></span><span style="position:absolute;top:947.192078px;left:111.891808px"><nobr>a significant amount of wealth. Smal monthly contributions, invested</span></nobr></span><span style="position:absolute;top:975.996521px;left:111.891808px"><nobr>consistently, can turn into big results in the future. Growing financialy is not </span></nobr></span><span style="position:absolute;top:1004.889221px;left:111.891808px"><nobr>about winning a lot all at once, but about making the right moves over and over </span></nobr></span><span style="position:absolute;top:1033.717896px;left:111.891808px"><nobr>again. This is the basis of building wealth. </span></nobr></span></p></div>','<div><div style="position:absolute;top:0.000000px;left:0.000000px"><nobr><img height="1344.000000" width="1008.000000" src ="bgimg/bg00008.jpg"/><br/></nobr></div></div>','<div><div style="position:absolute;top:0.000000px;left:0.000000px"><nobr><img height="1344.000000" width="1008.000000" src ="bgimg/bg00009.jpg"/><br/></nobr></div><p><span style="position:absolute;top:100.299477px;left:110.001312px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Checkmate in finances </span></nobr></span></p><p><span style="position:absolute;top:189.334305px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">High Profitability and Freedom Strategies </span></nobr></span></p><p><span style="position:absolute;top:284.588715px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">With debts eliminated and the first investments structured, the most awaited </span></nobr></span><span style="position:absolute;top:313.417328px;left:111.891808px"><nobr>moment arives: transforming your strategy into freedom. Financial checkmate </span></nobr></span><span style="position:absolute;top:342.245850px;left:111.891808px"><nobr>happens when you build enough passive income to cover your lifestyle without </span></nobr></span><span style="position:absolute;top:371.101074px;left:111.891808px"><nobr>depending on active work. This requires intelligence, consistency and good </span></nobr></span><span style="position:absolute;top:399.929779px;left:111.891808px"><nobr>choices of assets with high profitability, but also with well-calculated risks. This</span></nobr></span><span style="position:absolute;top:428.758301px;left:111.891808px"><nobr>is where the game really starts to change. </span></nobr></span></p><p><span style="position:absolute;top:486.415466px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">One of the key pieces at this moment are Real Estate Investment Funds (FIIs), </span></nobr></span><span style="position:absolute;top:515.243958px;left:111.891808px"><nobr>which allow you to receive monthly rents without having to buy physical </span></nobr></span><span style="position:absolute;top:544.072571px;left:111.891808px"><nobr>properties. In addition, shares of good companies that pay regular dividends </span></nobr></span><span style="position:absolute;top:572.901123px;left:111.891808px"><nobr>help to build a continuous income flow. For those looking to accelerate wealth </span></nobr></span><span style="position:absolute;top:601.729675px;left:111.891808px"><nobr>growth, it is also worth considering growth stocks and even international ETFs, </span></nobr></span><span style="position:absolute;top:630.534302px;left:111.891808px"><nobr>which expose your assets to more stable economies and are protected against </span></nobr></span><span style="position:absolute;top:659.426880px;left:111.891808px"><nobr>the devaluation of the local curency. </span></nobr></span></p><p><span style="position:absolute;top:717.083984px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Diversifying investments is like controling several fronts on the board: it reduces </span></nobr></span><span style="position:absolute;top:745.912598px;left:111.891808px"><nobr>risks and increases your chances of sucess. At the same time, it is essential to </span></nobr></span><span style="position:absolute;top:774.741211px;left:111.891808px"><nobr>protect what you are building with insurance, robust reserves and well-defined </span></nobr></span><span style="position:absolute;top:803.569641px;left:111.891808px"><nobr>risk management. Financial freedom isn’t just about earning more—it’s about </span></nobr></span><span style="position:absolute;top:832.398254px;left:111.891808px"><nobr>ensuring that you don’t lose everything in one miscalculated move. This</span></nobr></span><span style="position:absolute;top:861.226868px;left:111.891808px"><nobr>requires discipline and a long-term vision. </span></nobr></span></p><p><span style="position:absolute;top:918.860046px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Finally, establish a financial independence plan with clear goals: how much you </span></nobr></span><span style="position:absolute;top:947.739258px;left:111.891808px"><nobr>need to accumulate, how much you want to earn each month without having to </span></nobr></span><span style="position:absolute;top:976.567932px;left:111.891808px"><nobr>work, and how long it takes you to achieve this. Review this plan annually, make</span></nobr></span><span style="position:absolute;top:1005.396484px;left:111.891808px"><nobr>adjustments when necessary, and stay focused. In chess, the master wins not </span></nobr></span><span style="position:absolute;top:1034.225098px;left:111.891808px"><nobr>because he makes briliant moves all the time, but because he avoids mistakes </span></nobr></span><span style="position:absolute;top:1063.053589px;left:111.891808px"><nobr>and folows his strategy precisely. In the game of finance, the logic is the same.. </span></nobr></span></p></div>','<div><div style="position:absolute;top:0.000000px;left:0.000000px"><nobr><img height="1344.000000" width="1008.000000" src ="bgimg/bg00010.jpg"/><br/></nobr></div></div>','<div><div style="position:absolute;top:0.000000px;left:0.000000px"><nobr><img height="1344.000000" width="1008.000000" src ="bgimg/bg00011.jpg"/><br/></nobr></div><p><span style="position:absolute;top:189.761475px;left:106.220314px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Congratulations</span></nobr></span></p><p><span style="position:absolute;top:284.588715px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Thank you very much for geting this far! I am imensely grateful for you taking </span></nobr></span><span style="position:absolute;top:313.417328px;left:111.891808px"><nobr>the time to read this eBook. I hope the content has been useful, inspiring, or at </span></nobr></span><span style="position:absolute;top:342.245850px;left:111.891808px"><nobr>least made you reflect. Your reading is what gives meaning to all this work. Until</span></nobr></span><span style="position:absolute;top:371.101074px;left:111.891808px"><nobr>the next journey! </span></nobr></span></p><p><span style="position:absolute;top:429.212067px;left:111.891808px"><nobr><span class="" style="font-family:Arial;font-style:normal;font-weight:normal;color:#FFFFFF;writing-mode: horizontal-tb;">Now that you have completed the reading, I challenge you to turn knowledge </span></nobr></span><span style="position:absolute;top:458.040588px;left:111.891808px"><nobr>into action: 1) start investing monthly, even if it\'s a smal amount, to create the </span></nobr></span><span style="position:absolute;top:486.869141px;left:111.891808px"><nobr>habit; 2) record all your expenses for at least 90 days, understanding where your </span></nobr></span><span style="position:absolute;top:515.697754px;left:111.891808px"><nobr>money really goes; and 3) set a long-term financial goal and commit to </span></nobr></span><span style="position:absolute;top:544.502258px;left:111.891808px"><nobr>contributing to it monthly as a priority. True progress comes from consistency, </span></nobr></span><span style="position:absolute;top:573.381592px;left:111.891808px"><nobr>and by making this commitment to yourself, you wil be taking a firm step </span></nobr></span><span style="position:absolute;top:602.210205px;left:111.891808px"><nobr>towards the financial freedom you want to build. </span></nobr></span></p></div>']
+            }
+        },
+        mounted: function() {
+            this.$nextTick(function() {
+                this.pageNum = this.pageDatas.length;
+                this.pageContent = this.pageDatas[0];
+
+                this.setLeftMenuHeight();
+            })
+        },
+        watch: {
+            'currentPage': function(newVal, oldValue) {
+                // console.log('newVal ' + newVal, 'oldValue ' + oldValue);
+                if (newVal) {
+                    this.pageContent = this.pageDatas[this.currentPage - 1];
+                }
+            },
+            'zoomNum': function(newVal, oldValue) {
+                if (newVal) {
+                    this.zoomStyle = {
+                        'transform': 'scale(' + newVal + ')',
+                        '-webkit-transform': 'scale(' + newVal + ')',
+                        '-ms-transform': 'scale(' + newVal + ')',
+                        '-moz-transform': 'scale(' + newVal + ')',
+                        '-o-transform': 'scale(' + newVal + ')'
+                    }
+                }
+            }
+        },
+        methods: {
+            
+            changeCurrentPage: function(methods) {
+                switch (methods) {
+                    case 'first':
+                        this.currentPage = 1;
+                        break;
+                    case 'prev':
+                        if (this.currentPage > 1) {
+                            this.currentPage -= 1;
+                        }
+                        break;
+                    case 'next':
+                        if (this.currentPage < this.pageNum) {
+                            this.currentPage += 1;
+                        }
+                        break;
+                    case 'last':
+                        this.currentPage = this.pageNum;
+                        break;
+                }
+            },
+
+            gotoPage: function(page) {
+                console.log(page);
+                this.currentPage = page;
+            },
+            modifyZoom: function(type) {
+                switch (type) {
+                    case 'in':
+                        if (this.zoomNum < 2) {
+                            // this.zoomNum = (this.zoomNum + 0.1).toFixed(1);
+                            this.zoomNum = (parseFloat(this.zoomNum) + 0.1).toFixed(1);
+                        }
+                        break;
+                    case 'out':
+                        if (this.zoomNum > 0.5) {
+                            this.zoomNum = (parseFloat(this.zoomNum) - 0.1).toFixed(1);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                console.log(this.zoomNum);
+            },
+            setLeftMenuHeight: function() {
+                // this.asideHeight = document.body.scrollHeight - 60;
+                this.mainHeight = document.documentElement.clientHeight - 60 - 20;
+                // 60为头部导航高度， 46为menu高度， 40为上下padding
+                this.asideHeight = this.mainHeight - 20 - 46;
+            },
+            changePage: function(page) {
+                this.currentPage = page;
+                // this.pageContent = this.pageDatas[page - 1];
+            },
+            changeLeftMenu: function() {
+                this.ifMenuShow = !this.ifMenuShow;
+            }
+        }
+    });
+
+function gotoPage(page) {
+    console.log(page);
+    app.gotoPage(page);
+}
+
+</script>
+
+</html>
