@@ -21,7 +21,9 @@ Projeto com o objetivo de gerar um ebook digital com as facilidades das ferramen
 | Ação     | prompt |
 |----------|--------|
 | **título** | Crie um título de um ebook sobre o tema de finanças utilizando uma temática do jogo de xadrez, o ebook tem foco em ensinar sobre finanças para alncançar a liberdade financeira e reduzir dívidas. |
-| **conteúdo** | Faça um texto para meu ebook, de cada um dos 4 caítulos de modo direto com no máximo 4 parágrafos, utilizando as temáticas sugeridas anteriormente. |
+| **Temáticas** | Sugira temáticas para abordarmos no Ebook que vão compor os 4 capítulos. |
+| **Títulos - capítulos** | Crie para mim um título para cada um dos meus 4 capítulos de acordo com as temáticas que foram sugeridas. |
+| **conteúdo** | Faça um texto para meu ebook, de cada um dos 4 capítulos de modo direto com no máximo 4 parágrafos, utilizando as temáticas sugeridas anteriormente. |
 
 
 
@@ -35,6 +37,5 @@ Projeto com o objetivo de gerar um ebook digital com as facilidades das ferramen
 
 ## 📁 Materiais
 
-- Imagens utilizadas em `assets`
 - Ebook gerado durante as aulas em `output`
 - Prompts utilizados em `prompts`
