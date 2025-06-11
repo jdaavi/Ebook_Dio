@@ -4,7 +4,7 @@
 
 Projeto com o objetivo de gerar um ebook digital com as facilidades das ferramentas de IA. Todos os prompts seguem abaixo.
 
-📖 [Clique aqui para ler]('C:\Users\joao_\OneDrive\Área de Trabalho\Ebook_Dio\Ebook_Dio\output\Ebook novo.pptx')
+📖 [Clique aqui para ler]('output/Ebook novo.pptx')
 
 ---
 
